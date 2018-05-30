@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # usage: ./depend.sh filename buildfolder
 # If the file extension is *.cpp, it is considered as an implementation file,

@@ -37,7 +37,7 @@ stdenv.mkDerivation rec {
   src = sc15GraphSrc;
 
   buildInputs =
-    [ pbench chunkedseq ligraSrc
+    [ pbench chunkedseq ligraSrc pkgs.bash
       pkgs.makeWrapper pkgs.R pkgs.texlive.combined.scheme-small
       pkgs.ocaml gcc pkgs.wget
     ];
