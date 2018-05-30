@@ -136,7 +136,7 @@ include $(TOOLS_BUILD_FOLDER)/Makefile_modes
 PBENCH_OCAMLCOMP=ocamlc
 
 ifeq ($(PBENCH_PATH),)
-   PBENCH_PATH=../../../pbench
+   PBENCH_PATH=../../../../pbench
 endif
 
 include $(PBENCH_PATH)/Makefile_common
