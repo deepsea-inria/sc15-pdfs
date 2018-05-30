@@ -69,7 +69,7 @@ stdenv.mkDerivation rec {
     '';
     in
     ''
-    cp ${getNbCoresScript} sc15-graph/graph/bench/
+    cp ${getNbCoresScript} sc15-graph/graph/bench/get-nb-cores.sh
     export PATH=${php}/bin:$PATH
     make -C sc15-graph/graph/bench graph.pbench
     '';  
@@ -110,6 +110,7 @@ stdenv.mkDerivation rec {
     $out/bench/graph.pbench generate -only make -proc 1
     $out/bench/graph.pbench baselines -only make -proc 1
     $out/bench/graph.pbench overview -only make -proc 1
+    ./get-nb-cores.sh > $out/bench/nb_cores
     cp search.virtual search.opt2 search.elision2 graphfile.elision2 $out/bench
     popd
     cp ligra/ligra.cilk_* $out/bench

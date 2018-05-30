@@ -177,6 +177,23 @@ dot _data/sq_grid_tiny.dot -Tpdf > test.pdf
 (*****************************************************************************)
 (** Parameters *)
 
+let read_string_of fname =
+  if not (Sys.file_exists fname) then
+    None
+  else
+    let chan = open_in fname in
+    try
+      let s = String.trim (input_line chan) in
+      close_in chan;
+      Some s
+    with End_of_file -> (close_in chan; None)      
+                      
+let find_nb_cores _  =
+  match read_string_of "nb_cores" with
+  | None -> None
+  | Some nb_cores_str ->
+     Some (int_of_string nb_cores_str)
+
 let arg_faster = XCmd.mem_flag "faster" (* skip some slow graphs *)
 
 let arg_onlys = XCmd.parse_or_default_list_string "only" []
@@ -200,7 +217,10 @@ let arg_proc =
    if arg_proc >= 0 then arg_proc else begin
       match Pbench.get_localhost_name() with
       | "teraram" -> 40
-      | _ -> Pbench.error (sprintf "Cannot guess a value for option '-proc'")
+      | _ -> (
+         match find_nb_cores() with
+         | Some nb_cores -> nb_cores
+         | _ -> Pbench.error (sprintf "Cannot guess a value for option '-proc'"))
    end
 
 let arg_our_pbfs_cutoff = XCmd.parse_or_default_int "our_pbfs_cutoff" 1024
