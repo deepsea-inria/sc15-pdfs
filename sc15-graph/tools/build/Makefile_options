@@ -245,7 +245,7 @@ endif
 ####################################################################
 # Cilk alternative runtime support
 
-OPTIONS_cilk=-fcilkplus -lcilkrts -DUSE_CILK_RUNTIME $(CILKRTS_OPTIONS)
+OPTIONS_cilk=-fcilkplus -lcilkrts -ldl -DUSE_CILK_RUNTIME $(CILKRTS_OPTIONS)
 
 ####################################################################
 # HWLOC support
