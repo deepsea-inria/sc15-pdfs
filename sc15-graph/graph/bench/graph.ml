@@ -193,7 +193,7 @@ let arg_details = XCmd.mem_flag "details"
 let arg_idempotent = XCmd.parse_or_default_list_int "idempotent" [0;1]
 let arg_exps = XCmd.parse_or_default_list_string "exp" ["all"]
 let arg_mode = Mk_runs.mode_from_command_line "mode"
-
+let arg_path_to_data = XCmd.parse_or_default_string "path_to_data" "_data"
 
 let arg_proc =
    if arg_proc >= 0 then arg_proc else begin
@@ -329,7 +329,7 @@ let mk_sizes =
 
 let mk_graph_outputs_all_generated : Params.t =
    let mk_file file =
-      mk string "outfile" (sprintf "_data/%s.adj_bin" file) in
+      mk string "outfile" (sprintf "%s/%s.adj_bin" arg_path_to_data file) in
    let mk_file_by_size ?bits kind mk_by_size =
       Params.concat (~~ List.map use_sizes (fun size ->
          let bits = match bits with Some b -> b | None -> bits_for_size size in
@@ -804,7 +804,7 @@ let graph_renaming =
 
 let mk_graph_outputs_all_manual : Params.t =
    let mk_file file = (* ?todo: rename "outfile" into "output_file" *)
-      mk string "outfile" (sprintf "../../../sc15-graphs/%s.adj_bin" file) in
+      mk string "outfile" (sprintf "%s/%s.adj_bin" arg_path_to_data file) in
     let mk_manual file ?timeout size bits source =
        let timeout = XOption.unsome_or (XOption.unsome_or (timeout_for_size size) timeout) arg_timeout_opt in
          (mk_file file)
@@ -1285,7 +1285,6 @@ let name = "generate"
 let prog = "./graphfile.elision2"
 
 let make()  =
-   system("mkdir -p _data");
    build [prog]
 
 let run () =
