@@ -194,7 +194,8 @@ let arg_idempotent = XCmd.parse_or_default_list_int "idempotent" [0;1]
 let arg_exps = XCmd.parse_or_default_list_string "exp" ["all"]
 let arg_mode = Mk_runs.mode_from_command_line "mode"
 let arg_path_to_data = XCmd.parse_or_default_string "path_to_data" "_data"
-
+let arg_force_get = XCmd.mem_flag "force_get"
+                  
 let arg_proc =
    if arg_proc >= 0 then arg_proc else begin
       match Pbench.get_localhost_name() with
@@ -235,6 +236,18 @@ let nothing () = ()
 
 (*****************************************************************************)
 (** Files and binaries *)
+
+let ipfs_get hash outfile is_virtual =
+  system (sprintf "wget -O %s https://ipfs.io/ipfs/%s" outfile hash) 
+
+let ipfs_get_if_needed hash outfile force_get is_virtual =
+  if force_get || not (Sys.file_exists outfile) then
+    ipfs_get hash outfile is_virtual
+  else
+    ()
+
+let ipfs_get_files table force_get is_virtual =
+  List.iter (fun (h, p) -> ipfs_get_if_needed h p force_get is_virtual) table
 
 let prog_parallel_cilk = "./search.cilk"
 let prog_parallel_cilk_seq_init = "./search.cilk_seq_init"
@@ -800,11 +813,38 @@ let graph_renaming =
      "grid_sq", "square_grid";
      "cube", "cube_grid";
     ]
-*)
+ *)
+
+let hashes_of_graphs = [
+   "QmYRQUzDmaJ4vHNTJSk8VWs9JTD6kZPyWcKfQabbWxgQvc", "orkut";
+   "QmZJk9P5qodnwfKKHUa4BnCR4NyNg2NkyLbJoJJjFhSm6G", "livejournal1";
+   "QmW7y6EL3FtakEw9UxtqhDjkhcZVAGtqJZi5dXeKtcKCjt", "twitter";
+   "QmWLc6h7MqwbpzFVvrgWrhzpEuhnxdHfEfcW8sc92ddePv", "friendster";
+   "QmYrupxDXnYfbw8Vj8tDN7PYrMxWiCmNLS4xLHQ7QF64CF", "cage15";
+   "QmUe8sV6hBfS45HtogKC3cxwenR45UHMBcbGtni5WoXqiE", "Freescale1";
+   "QmYi8Ga5j4zb1XWBGjR4f9WRWbQYs5BC4yARuJKtAdvG6w", "wikipedia-20070206";
+   "QmfBrYSuGrjSGvdP1feFGMVoSa4TfuBsVWhoHUvQtShT9B", "kkt_power";
+   "QmU5NuE1KDnPo9jEXfr44tr9hu6o1NHtiaq1Vr9B7qvSuK", "rgg";
+   "QmSXK5B3zPh3WAtuQmtkj6XfkcSK4jLT2WJ67Fzxge7Q6r", "delaunay";
+   "QmcGm3pWSqksakmggKgXK7wuGhtkYx15y5YHqDobErFvW5", "usa";
+   "QmSA2tgcdKoyFWfktdQVb6AuJfsg6Se5cbBfAf878BAiEc", "europe";
+  ]
+
+let path_of_graphname n =
+  sprintf "%s/%s.adj_bin" arg_path_to_data n
+
+let row_of_infile name =
+  let h, _ = List.find (fun (_, n) -> n = name) hashes_of_graphs in
+  (h, path_of_graphname name)
+
+let download_all_graphs () =
+  let graphnames = List.map (fun (_,n) -> n) hashes_of_graphs in
+  let table = List.map row_of_infile graphnames in
+  ipfs_get_files table arg_force_get arg_virtual_run
 
 let mk_graph_outputs_all_manual : Params.t =
    let mk_file file = (* ?todo: rename "outfile" into "output_file" *)
-      mk string "outfile" (sprintf "%s/%s.adj_bin" arg_path_to_data file) in
+      mk string "outfile" (path_of_graphname file) in
     let mk_manual file ?timeout size bits source =
        let timeout = XOption.unsome_or (XOption.unsome_or (timeout_for_size size) timeout) arg_timeout_opt in
          (mk_file file)
@@ -1287,7 +1327,8 @@ let prog = "./graphfile.elision2"
 let make()  =
    build [prog]
 
-let run () =
+let run () = (
+   download_all_graphs();
    Mk_runs.(call (run_modes @ [
       Output (file_results name);
       Timeout 100000;
@@ -1296,7 +1337,7 @@ let run () =
          & mk int "loop_cutoff" 1000
          & mk_graph_outputs_generated
         (*         & mk_eval int "proc" (fun e -> Env.get_as_int e "generator_proc")*)
-       ) ] ))
+       ) ] )))
 
 let plot () =
    Mk_bar_plot.(call ([
