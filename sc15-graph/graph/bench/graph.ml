@@ -188,8 +188,8 @@ let read_string_of fname =
       Some s
     with End_of_file -> (close_in chan; None)      
                       
-let find_nb_cores _  =
-  match read_string_of "nb_cores" with
+let find_nb_cores path  =
+  match read_string_of path with
   | None -> None
   | Some nb_cores_str ->
      Some (int_of_string nb_cores_str)
@@ -211,6 +211,7 @@ let arg_idempotent = XCmd.parse_or_default_list_int "idempotent" [0;1]
 let arg_exps = XCmd.parse_or_default_list_string "exp" ["all"]
 let arg_mode = Mk_runs.mode_from_command_line "mode"
 let arg_path_to_data = XCmd.parse_or_default_string "path_to_data" "_data"
+let arg_path_to_nb_cores = XCmd.parse_or_default_string "path_to_nb_cores" "nb_cores"
 let arg_force_get = XCmd.mem_flag "force_get"
                   
 let arg_proc =
@@ -218,7 +219,7 @@ let arg_proc =
       match Pbench.get_localhost_name() with
       | "teraram" -> 40
       | _ -> (
-         match find_nb_cores() with
+         match find_nb_cores arg_path_to_nb_cores with
          | Some nb_cores -> nb_cores
          | _ -> Pbench.error (sprintf "Cannot guess a value for option '-proc'"))
    end

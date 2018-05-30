@@ -64,7 +64,7 @@ stdenv.mkDerivation rec {
   buildPhase =
     let getNbCoresScript = pkgs.writeScript "get-nb-cores.sh" ''
       #!/usr/bin/env bash
-      nb_cores=$( hwloc-ls --only core | wc -l )
+      nb_cores=$( ${hwloc}/bin/hwloc-ls --only core | wc -l )
       echo $nb_cores
     '';
     in
@@ -90,7 +90,8 @@ stdenv.mkDerivation rec {
         "-path_to_data ${pathToData}"
       else "";
     in
-    let flags = "${nmf} ${rf} ${df}";
+    let nc = "-path_to_nb_cores $out/bench/nb_cores"; in
+    let flags = "${nmf} ${rf} ${df} ${nc}";
     in
     ''
     mkdir -p $out/bench/
