@@ -262,7 +262,7 @@ let ipfs_get hash outfile is_virtual =
   system (sprintf "wget -O %s https://ipfs.io/ipfs/%s" outfile hash) 
 
 let ipfs_get_if_needed hash outfile force_get is_virtual =
-  if force_get || not (Sys.file_exists outfile) then
+  if not(is_virtual) && (force_get || not (Sys.file_exists outfile)) then
     ipfs_get hash outfile is_virtual
   else
     ()
@@ -270,16 +270,16 @@ let ipfs_get_if_needed hash outfile force_get is_virtual =
 let ipfs_get_files table force_get is_virtual =
   List.iter (fun (h, p) -> ipfs_get_if_needed h p force_get is_virtual) table
 
-let prog_parallel_cilk = "./search.cilk"
-let prog_parallel_cilk_seq_init = "./search.cilk_seq_init"
+let prog_parallel_cilk = "search.cilk"
+let prog_parallel_cilk_seq_init = "search.cilk_seq_init"
 
 let prog_parallel =
-  if not arg_use_cilk then "./search.opt2"
+  if not arg_use_cilk then "search.opt2"
   else prog_parallel_cilk
 let prog_parallel_seq_init =
-  if not arg_use_cilk then "./search.opt2_seq_init"
+  if not arg_use_cilk then "search.opt2_seq_init"
   else prog_parallel_cilk_seq_init
-let prog_sequential = "./search.elision2"
+let prog_sequential = "search.elision2"
 
 let build_in folder bs =
   let make_cmd = "make -j " in
@@ -1343,12 +1343,13 @@ module ExpGenerate = struct
 
 let name = "generate"
 
-let prog = "./graphfile.elision2"
+let prog = "graphfile.elision2"
 
 let make()  =
    build [prog]
 
 let run () = (
+   system(sprintf "mkdir -p %s" arg_path_to_data);
    download_all_graphs();
    Mk_runs.(call (run_modes @ [
       Output (file_results name);
@@ -1903,10 +1904,10 @@ let name = "compare"
 
 let arg_stat = XCmd.mem_flag "stat"
 
-let prog_parallel_here = "./search.sta" (* "./search.opt2" *)
+let prog_parallel_here = "search.sta" (* "./search.opt2" *)
 
 let prog_parallel =
-  if arg_stat then "./search.sta" else prog_parallel_here
+  if arg_stat then "search.sta" else prog_parallel_here
 
 let mk_ls node_cutoff edge_cutoff = 
   (mk_algo_frontier "ls_pbfs" "ls_bag"
@@ -2218,7 +2219,6 @@ let mk_parallel_bfs =
 let prog_parallel_here = (*"./search.sta"*)  (*"./search.opt2" *) "search.virtual"
 let prog_ls_pbfs_cilk = "ls-pbfs.cilk_32"
 let prog_ligra = "ligra.cilk"
-let prog_ligra_here = "./" ^ prog_ligra
 
 let mk_parallel_prog_maxproc_here =
    mk_prog prog_parallel_here
@@ -2975,7 +2975,7 @@ module ExpLigra = struct
 
 let name = "ligra"
 
-let mk_programs_ours = (mk_prog "./search.opt2" & mk_our_lazy_parallel_bfs)
+let mk_programs_ours = (mk_prog "search.opt2" & mk_our_lazy_parallel_bfs)
 let mk_programs_ligra = (mk_prog "search.virtual" & mk_algo "ligra")
 let mk_programs_algos = mk_programs_ours ++ mk_programs_ligra
 
