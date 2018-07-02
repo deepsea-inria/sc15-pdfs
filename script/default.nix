@@ -111,9 +111,14 @@ stdenv.mkDerivation rec {
     $out/bench/graph.pbench generate -only make -proc 1
     $out/bench/graph.pbench baselines -only make -proc 1
     $out/bench/graph.pbench overview -only make -proc 1
+    make search.all_opt2
     ./get-nb-cores.sh > $out/bench/nb_cores
-    cp search.virtual search.opt2 search.elision2 graphfile.elision2 $out/bench
+    cp search.virtual search.opt2 search.elision2 graphfile.elision2 search.all_opt2 $out/bench
     popd
+    wrapProgram $out/bench/search.all_opt2 --prefix PATH ":" ${gcc}/bin \
+       --prefix PATH ":" ${numactl}/bin \
+       --prefix LD_LIBRARY_PATH ":" ${gcc}/lib \
+       --prefix LD_LIBRARY_PATH ":" ${gcc}/lib64
     cp ligra/ligra.cilk_* $out/bench
     '';
 
