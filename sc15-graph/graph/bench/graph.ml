@@ -259,10 +259,15 @@ let nothing () = ()
 (** Files and binaries *)
 
 let ipfs_get hash outfile is_virtual =
-  system (sprintf "wget -O %s https://ipfs.io/ipfs/%s" outfile hash) 
+  let cmd = sprintf "ipget -o %s %s" outfile hash in
+  if not(is_virtual) then
+    (printf "%s\n" cmd;
+    system cmd)
+  else
+    printf "%s\n" cmd
 
 let ipfs_get_if_needed hash outfile force_get is_virtual =
-  if not(is_virtual) && (force_get || not (Sys.file_exists outfile)) then
+  if (force_get || not (Sys.file_exists outfile)) then
     ipfs_get hash outfile is_virtual
   else
     ()

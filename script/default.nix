@@ -39,7 +39,7 @@ stdenv.mkDerivation rec {
   buildInputs =
     [ pbench chunkedseq ligraSrc pkgs.bash
       pkgs.makeWrapper pkgs.R pkgs.texlive.combined.scheme-small
-      pkgs.ocaml gcc pkgs.wget
+      pkgs.ocaml gcc
     ];
 
   configurePhase =
@@ -101,7 +101,7 @@ stdenv.mkDerivation rec {
        --prefix PATH ":" ${gcc}/bin \
        --prefix PATH ":" ${php}/bin \
        --prefix PATH ":" ${numactl}/bin \
-       --prefix PATH ":" ${pkgs.wget}/bin \
+       --prefix PATH ":" ${pkgs.ipget}/bin \
        --prefix PATH ":" $out/bench \
        --prefix LD_LIBRARY_PATH ":" ${gcc}/lib \
        --prefix LD_LIBRARY_PATH ":" ${gcc}/lib64 \
