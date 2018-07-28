@@ -26,8 +26,8 @@ let pkgs = import <nixpkgs> {}; in
   sc15GraphSrc = pkgs.fetchFromGitHub {
     owner  = "deepsea-inria";
     repo   = "sc15-pdfs";
-    rev    = "af423d77292ab03d1a11d309841b214cb12a20d2";
-    sha256 = "0hla7xx9aka3rz1wz0ap12mmbqdlhwi8i3rmbs7asbp7slaxrp2x";
+    rev    = "fc0d5373780843376bd38d6f0f3eb8f514b9b782";
+    sha256 = "0fz3pxw80v00d7lw1rv5p16r96fajp9d5lyagxmdv6sfxcik8hln";
   };
 
 }
