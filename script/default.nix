@@ -18,8 +18,7 @@ let
     hwloc = hwloc;
 
     gcc = gcc;
-
-
+    
     chunkedseq = callPackage "${sources.chunkedseqSrc}/script/default.nix" { };
 
     ligraSrc = sources.ligraSrc;
@@ -120,7 +119,6 @@ stdenv.mkDerivation rec {
        --prefix PATH ":" ${numactl}/bin \
        --prefix LD_LIBRARY_PATH ":" ${gcc}/lib \
        --prefix LD_LIBRARY_PATH ":" ${gcc}/lib64
-    cp -r --no-preserve=mode ${ligraSrc}/ligra.cilk_* $out/bench
     '';
 
   meta = {

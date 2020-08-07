@@ -3,7 +3,7 @@
   makeWrapper ? pkgs.makeWrapper,
   hwloc ? pkgs.hwloc,
   ipget ? pkgs.ipget,
-  sources ? import ./local-sources.nix,
+  sources ? import ./default-sources.nix,
   buildDunePackage ? pkgs.ocamlPackages.buildDunePackage,
   pbenchOcaml ? import sources.pbenchOcamlSrcs.pbenchOcaml { pbenchOcamlSrc = sources.pbenchOcamlSrcs.pbenchOcamlSrc; }
 }:
@@ -25,7 +25,7 @@ in
 stdenv.mkDerivation rec {
   name = "bench-script";
 
-  src = "${sources.nixSrc}/dummy";
+  src = "${sources.nixSrc}";
 
   buildInputs = [ makeWrapper ];
 
