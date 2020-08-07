@@ -10,10 +10,10 @@ let pkgs = import <nixpkgs> {}; in
   };
 
   pbenchSrc = pkgs.fetchFromGitHub {
-    owner  = "deepsea-inria";
-    repo   = "pbench";
-    rev    = "6d862442713cae93153c439a3e5e5867e95af958";
-    sha256 = "1qdsl2amaqkckp2r2s4j5az8b0bpkbrgf8nc0zp575l1yjdzi2hh";
+      owner  = "mikerainey";
+      repo   = "pbench";
+      rev    = "1c90259b594b6612bc6b9973564e89c297ad17b3";
+      sha256 = "1440zavl3v74hcyg49h026vghhj1rv5lhfsb5rgfzmndfynzz7z0";
   };
 
   chunkedseqSrc = pkgs.fetchFromGitHub {

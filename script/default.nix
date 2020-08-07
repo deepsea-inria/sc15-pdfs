@@ -19,11 +19,13 @@ let
 
     gcc = gcc;
 
-    pbench = callPackage "${sources.pbenchSrc}/script/default.nix" { };
+
     chunkedseq = callPackage "${sources.chunkedseqSrc}/script/default.nix" { };
 
     ligraSrc = sources.ligraSrc;
     sc15GraphSrc = sources.sc15GraphSrc;
+
+    graphBench = import ./bench-script.nix { sources = sources; };
     
   };
 
@@ -37,9 +39,9 @@ stdenv.mkDerivation rec {
   src = sc15GraphSrc;
 
   buildInputs =
-    [ pbench chunkedseq ligraSrc pkgs.bash
+    [ chunkedseq ligraSrc pkgs.bash
       pkgs.makeWrapper pkgs.R pkgs.texlive.combined.scheme-small
-      pkgs.ocaml gcc
+      pkgs.ocaml gcc php
     ];
 
   configurePhase =
@@ -50,14 +52,11 @@ stdenv.mkDerivation rec {
       '';
     in
     let settingsScript = pkgs.writeText "settings.sh" ''
-      PBENCH_PATH=../../../pbench/
       CHUNKEDSEQ_PATH=${chunkedseq}/include/
       ${hwlocConfig}    
     '';
     in
     ''
-    cp -r --no-preserve=mode ${pbench} pbench
-    cp -r --no-preserve=mode ${ligraSrc} ligra
     cp ${settingsScript} sc15-graph/graph/bench/settings.sh
     '';
 
@@ -69,9 +68,13 @@ stdenv.mkDerivation rec {
     '';
     in
     ''
-    cp ${getNbCoresScript} sc15-graph/graph/bench/get-nb-cores.sh
     export PATH=${php}/bin:$PATH
-    make -C sc15-graph/graph/bench graph.pbench
+    pushd sc15-graph/graph/bench
+    cp ${getNbCoresScript} ./get-nb-cores.sh
+    bash ./get-nb-cores.sh > nb_cores
+    make search.all_opt2 
+    make search.opt2 search.elision2 graphfile.elision2
+    popd
     '';  
 
   installPhase =
@@ -95,7 +98,13 @@ stdenv.mkDerivation rec {
     in
     ''
     mkdir -p $out/bench/
-    cp sc15-graph/graph/bench/graph.pbench sc15-graph/graph/bench/timeout.out $out/bench/
+    cp sc15-graph/graph/bench/nb_cores $out/bench
+    cp sc15-graph/graph/bench/search.all_opt2 $out/bench
+    cp sc15-graph/graph/bench/search.virtual  $out/bench
+    cp sc15-graph/graph/bench/search.opt2  $out/bench
+    cp sc15-graph/graph/bench/search.elision2 $out/bench
+    cp sc15-graph/graph/bench/graphfile.elision2 $out/bench
+    cp ${graphBench}/graph $out/bench/graph.pbench
     wrapProgram $out/bench/graph.pbench --prefix PATH ":" ${pkgs.R}/bin \
        --prefix PATH ":" ${pkgs.texlive.combined.scheme-small}/bin \
        --prefix PATH ":" ${gcc}/bin \
@@ -107,19 +116,11 @@ stdenv.mkDerivation rec {
        --prefix LD_LIBRARY_PATH ":" ${gcc}/lib64 \
        ${hw} \
        --add-flags "${flags}"
-    pushd sc15-graph/graph/bench
-    $out/bench/graph.pbench generate -only make -proc 1
-    $out/bench/graph.pbench baselines -only make -proc 1
-    $out/bench/graph.pbench overview -only make -proc 1
-    make search.all_opt2
-    ./get-nb-cores.sh > $out/bench/nb_cores
-    cp search.virtual search.opt2 search.elision2 graphfile.elision2 search.all_opt2 $out/bench
-    popd
     wrapProgram $out/bench/search.all_opt2 --prefix PATH ":" ${gcc}/bin \
        --prefix PATH ":" ${numactl}/bin \
        --prefix LD_LIBRARY_PATH ":" ${gcc}/lib \
        --prefix LD_LIBRARY_PATH ":" ${gcc}/lib64
-    cp ligra/ligra.cilk_* $out/bench
+    cp -r --no-preserve=mode ${ligraSrc}/ligra.cilk_* $out/bench
     '';
 
   meta = {

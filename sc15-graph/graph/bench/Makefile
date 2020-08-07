@@ -36,8 +36,10 @@ USE_NUMA=0
 
 # Options are then configured by the auxiliary file below
 
-include $(TOOLS_BUILD_FOLDER)/Makefile_options
-
+exist2 := $(wildcard $(TOOLS_BUILD_FOLDER)/Makefile_options)
+ifneq ($(strip $(exist2)),)
+	include $(TOOLS_BUILD_FOLDER)/Makefile_options
+endif
 
 ####################################################################
 # Modes
@@ -112,8 +114,10 @@ clean: clean_build clean_modes
 ####################################################################
 # Main rules for the makefile
 
-include $(TOOLS_BUILD_FOLDER)/Makefile_modes
-
+exist := $(wildcard $(TOOLS_BUILD_FOLDER)/Makefile_modes)
+ifneq ($(strip $(exist)),)
+	include $(TOOLS_BUILD_FOLDER)/Makefile_modes
+endif
 
 ####################################################################
 #
@@ -135,14 +139,14 @@ include $(TOOLS_BUILD_FOLDER)/Makefile_modes
 
 PBENCH_OCAMLCOMP=ocamlc
 
-ifeq ($(PBENCH_PATH),)
-   PBENCH_PATH=../../../../pbench
-endif
+# ifeq ($(PBENCH_PATH),)
+#    PBENCH_PATH=../../../../pbench
+# endif
 
-include $(PBENCH_PATH)/Makefile_common
+# include $(PBENCH_PATH)/Makefile_common
 
-graph: graph.pbench
-	ln -sf $< $@ 
+# graph: graph.pbench
+# 	ln -sf $< $@ 
 
 overview: graph
 	./graph overview -size large -proc 40
@@ -171,8 +175,7 @@ graph_change_plot: graph
 ligra_comp: graph
 	./graph ligra -size small -proc 40 -skip make
 
-clean: pbench_clean
-	
+clean:
 
 ####################################################################
 #  study --DEPRECATED

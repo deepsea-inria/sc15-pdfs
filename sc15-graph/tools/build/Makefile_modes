@@ -173,7 +173,7 @@ FILTEROBJ_SCRIPT=$(BUILD_TOOLS_PATH)/filterobj.sh
 
 define generate-dep-rule
 $(BUILD)/$1/$(notdir $2).d: $2 | $(BUILD)/$1
-	$(DEPEND_SCRIPT) $2 $(BUILD)/$1 > $$@ 
+	bash $(DEPEND_SCRIPT) $2 $(BUILD)/$1 > $$@ 
 endef
 $(foreach mode,$(MODES),$(foreach f,$(HEADERS_AND_IMPLEMS),$(eval $(call generate-dep-rule,$(mode),$(f)))))
 
